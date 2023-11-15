@@ -1,7 +1,5 @@
 package com.nhnacademy.bookpubdelivery.config;
 
-import java.util.Properties;
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,12 +7,6 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.Database;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * mysql 접속 설정 클래스.
@@ -47,7 +39,6 @@ public class DataSourceConfig {
     public DataSource dataSource() {
         BasicDataSource dataSource = new BasicDataSource();
 
-        log.warn(keyConfig.keyStore(url));
         dataSource.setDriverClassName(com.mysql.cj.jdbc.Driver.class.getName());
         dataSource.setUrl(keyConfig.keyStore(url));
         dataSource.setUsername(keyConfig.keyStore(userName));
@@ -67,56 +58,6 @@ public class DataSourceConfig {
         return dataSource;
 
     }
-
-    /**
-     * 엔티티관리자에 어떤 datasource 를 쓸껀지 정해줄때 쓰임.
-     *
-     * @param dataSource 데이터소스.
-     * @return LocalContainerEntityManagerFactoryBean 엔티티관리자.
-     * @author : 유호철
-     */
-    @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
-        LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
-        emf.setDataSource(dataSource);
-        emf.setPackagesToScan("com.nhnacademy.bookpubdelivery");
-        emf.setJpaVendorAdapter(jpaVendorAdapters());
-        emf.setJpaProperties(jpaProperties());
-
-        return emf;
-    }
-
-    private JpaVendorAdapter jpaVendorAdapters() {
-        HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
-        hibernateJpaVendorAdapter.setDatabase(Database.MYSQL);
-        return hibernateJpaVendorAdapter;
-    }
-
-    private Properties jpaProperties() {
-        Properties jpaProperties = new Properties();
-        jpaProperties.setProperty("hibernate.show_sql", "true");
-        jpaProperties.setProperty("hibernate.highlight_sql", "true");
-        jpaProperties.setProperty("hibernate.format_sql", "true");
-
-        return jpaProperties;
-    }
-
-    /**
-     * jpa 를 사용하기 때문에 JpaTranscationManager 를 사용한다.
-     *
-     * @param entityManagerFactory 엔티티매니저 팩토리 주입.
-     * @return PlatformTransactionManager tx 매니저를 어떤식으로 쓸지 반환.
-     * @author : 유호철
-     */
-    @Bean
-    public PlatformTransactionManager transactionManager(
-            EntityManagerFactory entityManagerFactory) {
-        JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(entityManagerFactory);
-
-        return transactionManager;
-    }
-
 
     public KeyConfig getKeyConfig() {
         return keyConfig;
